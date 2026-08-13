@@ -74,17 +74,150 @@ Errors:
         "latitude": 26.5775,
         "longitude": 93.1711
       }
-    ]
+    ],
+    "nearby_safety": {
+      "search_radius_km": 25,
+      "patrol_units": [
+        {
+          "id": "patrol_kohora_1",
+          "name": "Kaziranga Kohora Forest Patrol Unit",
+          "resource_type": "PATROL",
+          "latitude": 26.5835,
+          "longitude": 93.1745,
+          "distance_m": 712.5,
+          "phone": "+91-3776-262001"
+        }
+      ],
+      "police": [],
+      "hospitals": []
+    }
   },
   "message": "Location updated"
 }
 ```
 
-**Errors:** `422` validation, `500` server
+---
+
+### Get live location (with nearby safety resources)
+
+- **Method:** `GET`
+- **Route:** `/locations/{tourist_id}/live?radius_km=25`
+
+Returns current location, geofence status, and nearest **patrol units**, **police**, and **hospitals** within the search radius.
+
+**Response `200`**
+
+```json
+{
+  "success": true,
+  "data": {
+    "location": { "tourist_id": "123", "latitude": 26.5775, "longitude": 93.1711 },
+    "geofence_status": "INSIDE",
+    "active_zones": ["unsafe_core_1"],
+    "events": [],
+    "nearby_safety": {
+      "search_radius_km": 25,
+      "patrol_units": [],
+      "police": [],
+      "hospitals": []
+    }
+  }
+}
+```
+
+**Errors:** `404` no location for tourist
 
 ---
 
 ### Get current location
+
+- **Method:** `GET`
+- **Route:** `/locations/{tourist_id}/current`
+
+**Response `200`:** `data` = location object only (no nearby safety — use `/live` for full safety context)
+
+**Errors:** `404` no location for tourist
+
+---
+
+## Safety Resource APIs
+
+Pre-seeded for **Kaziranga National Park, Assam** with patrol units, police outposts, and hospitals.
+
+### List all safety resources
+
+- **Method:** `GET`
+- **Route:** `/safety-resources?resource_type=PATROL&active_only=true`
+
+`resource_type` values: `PATROL`, `POLICE`, `HOSPITAL`
+
+### Find nearby safety resources
+
+- **Method:** `GET`
+- **Route:** `/safety-resources/nearby?latitude=26.5775&longitude=93.1711&radius_km=25`
+
+**Response `200`**
+
+```json
+{
+  "success": true,
+  "data": {
+    "search_radius_km": 25,
+    "patrol_units": [
+      {
+        "id": "patrol_kohora_1",
+        "name": "Kaziranga Kohora Forest Patrol Unit",
+        "resource_type": "PATROL",
+        "latitude": 26.5835,
+        "longitude": 93.1745,
+        "address": "Kohora Range, Kaziranga National Park, Assam",
+        "phone": "+91-3776-262001",
+        "distance_m": 712.5,
+        "is_24x7": true
+      }
+    ],
+    "police": [],
+    "hospitals": []
+  }
+}
+```
+
+### Create / update / delete safety resource
+
+- `POST /safety-resources`
+- `GET /safety-resources/{resource_id}`
+- `PATCH /safety-resources/{resource_id}`
+- `DELETE /safety-resources/{resource_id}`
+
+---
+
+## Location APIs (continued)
+
+### Update tourist location (original docs)
+
+- **Method:** `POST`
+- **Route:** `/locations/{tourist_id}`
+
+**Request**
+
+```json
+{
+  "latitude": 26.5775,
+  "longitude": 93.1711,
+  "accuracy": 12.5,
+  "speed": 1.4,
+  "heading": 180,
+  "recorded_at": "2026-08-13T00:00:00Z"
+}
+```
+
+**Response `200`** — includes `nearby_safety` (see above)
+
+**Errors:** `422` validation, `500` server
+
+---
+
+### Get current location (legacy — location only)
 
 - **Method:** `GET`
 - **Route:** `/locations/{tourist_id}/current`

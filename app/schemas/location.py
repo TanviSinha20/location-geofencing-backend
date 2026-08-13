@@ -38,6 +38,7 @@ class LocationUpdateResult(BaseModel):
     geofence_status: str
     active_zones: list[str]
     events: list["GeofenceEventResponse"]
+    nearby_safety: "NearbySafetyResponse | None" = None
 
 
 class TouristLocationSummary(BaseModel):
@@ -68,7 +69,8 @@ class MockLocationRequest(BaseModel):
     label: str | None = Field(None, description="Optional test label e.g. safe, unsafe_entry")
 
 
-# Forward reference resolved in geofence schema
+# Forward reference resolved in geofence/safety schemas
 from app.schemas.geofence import GeofenceEventResponse  # noqa: E402
+from app.schemas.safety_resource import NearbySafetyResponse  # noqa: E402
 
 LocationUpdateResult.model_rebuild()

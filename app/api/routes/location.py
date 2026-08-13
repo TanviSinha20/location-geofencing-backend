@@ -1,6 +1,6 @@
 """Location API routes."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
@@ -14,6 +14,7 @@ from app.schemas.location import (
     SimulateMovementResponse,
     TouristLocationSummary,
 )
+from app.schemas.safety_resource import LiveLocationResponse
 from app.services.location_service import LocationService
 
 router = APIRouter(prefix="/locations", tags=["locations"])
@@ -33,6 +34,20 @@ def update_location(
     service = LocationService(db)
     result = service.update_location(tourist_id, payload)
     return APIResponse(data=result, message="Location updated")
+
+
+@router.get(
+    "/{tourist_id}/live",
+    response_model=APIResponse[LiveLocationResponse],
+    summary="Get live location with geofence status and nearby safety resources",
+)
+def get_live_location(
+    tourist_id: str,
+    radius_km: float = Query(25.0, gt=0, le=100),
+    db: Session = Depends(get_db),
+) -> APIResponse[LiveLocationResponse]:
+    service = LocationService(db)
+    return APIResponse(data=service.get_live_location(tourist_id, safety_radius_km=radius_km))
 
 
 @router.get(
