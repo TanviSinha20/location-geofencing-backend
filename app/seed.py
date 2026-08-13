@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.geofence import GeoFence
 from app.models.safety_resource import SafetyResource
+from app.models.target_zone import TargetZone
 from app.schemas.geofence import CircleGeometry, GeoFenceCreateRequest, PolygonGeometry
 from app.schemas.location import LocationUpdateRequest
 from app.schemas.safety_resource import SafetyResourceCreateRequest
@@ -188,6 +189,36 @@ DEFAULT_SAFETY_RESOURCES: list[SafetyResourceCreateRequest] = [
 ]
 
 
+# Authority broadcast target zones (matches frontend dropdown)
+DEFAULT_TARGET_ZONES: list[dict] = [
+    {
+        "id": "hp_solang_rohtang",
+        "name": "Himachal Pradesh (Solang / Rohtang)",
+        "state": "Himachal Pradesh",
+        "center_lat": 32.3167,
+        "center_lng": 77.1333,
+        "default_radius_km": 14.0,
+        "description": "High-altitude zone prone to flash floods, cloudbursts, and landslides.",
+    },
+    {
+        "id": "as_kaziranga",
+        "name": "Assam (Kaziranga National Park)",
+        "state": "Assam",
+        "center_lat": 26.5775,
+        "center_lng": 93.1711,
+        "default_radius_km": 14.0,
+        "description": "Wildlife sanctuary and ecologically sensitive tourist area.",
+    },
+]
+
+# Demo tourists for Himachal broadcast testing
+HIMACHAL_TEST_TOURISTS = [
+    ("tourist_hp_1", 32.3200, 77.1400),   # inside 14 km
+    ("tourist_hp_2", 32.3100, 77.1250),   # inside 14 km
+    ("tourist_hp_3", 32.4500, 77.3000),   # outside 14 km
+]
+
+
 def seed_zones(db: Session) -> None:
     service = GeofenceService(db)
     for zone in DEFAULT_ZONES:
@@ -201,6 +232,7 @@ def seed_sample_locations(db: Session) -> None:
     samples = [
         ("tourist_safe_1", *TEST_COORDINATES["safe"]),
         ("tourist_test_2", *TEST_COORDINATES["approach_unsafe"]),
+        *HIMACHAL_TEST_TOURISTS,
     ]
     for tourist_id, lat, lng in samples:
         try:
@@ -220,7 +252,16 @@ def seed_safety_resources(db: Session) -> None:
         service.create_resource(resource)
 
 
+def seed_target_zones(db: Session) -> None:
+    for zone_data in DEFAULT_TARGET_ZONES:
+        if db.get(TargetZone, zone_data["id"]):
+            continue
+        db.add(TargetZone(**zone_data))
+    db.commit()
+
+
 def run_seed(db: Session) -> None:
     seed_zones(db)
+    seed_target_zones(db)
     seed_safety_resources(db)
     seed_sample_locations(db)

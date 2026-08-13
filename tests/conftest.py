@@ -32,9 +32,10 @@ def db_session():
 
 @pytest.fixture()
 def client(db_session):
-    from app.seed import seed_safety_resources, seed_zones
+    from app.seed import seed_safety_resources, seed_target_zones, seed_zones
 
     seed_zones(db_session)
+    seed_target_zones(db_session)
     seed_safety_resources(db_session)
 
     def override_get_db():

@@ -12,6 +12,12 @@ class LocationUpdateRequest(BaseModel):
     speed: float | None = Field(None, ge=0, description="Speed in m/s")
     heading: float | None = Field(None, ge=0, lt=360, description="Bearing in degrees")
     recorded_at: datetime | None = Field(None, description="Client timestamp; defaults to server time")
+    safety_radius_km: float | None = Field(
+        None,
+        gt=0,
+        le=100,
+        description="User-configured radius (km) for nearby safety resource search",
+    )
 
     @field_validator("latitude", "longitude")
     @classmethod

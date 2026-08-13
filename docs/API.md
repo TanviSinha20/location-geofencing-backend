@@ -467,3 +467,160 @@ Before creating an SOS incident, call:
 `GET /locations/{tourist_id}/current`
 
 Use returned `latitude`, `longitude`, and `recorded_at` as the incident location snapshot.
+
+---
+
+## Geofenced Emergency Broadcast Centre (Authority Dashboard)
+
+Matches the authority UI: target zone dropdown, **geofence radius slider**, severity toggle, title, and message.
+
+### Get radius slider config
+
+- **Method:** `GET`
+- **Route:** `/broadcast/radius-config?zone_id=hp_solang_rohtang`
+
+**Response**
+
+```json
+{
+  "success": true,
+  "data": {
+    "min_km": 1,
+    "max_km": 50,
+    "default_km": 14,
+    "step_km": 1
+  }
+}
+```
+
+Use `default_km` when user selects a target zone. Re-fetch when zone changes.
+
+---
+
+### List target zones (dropdown)
+
+- **Method:** `GET`
+- **Route:** `/broadcast/target-zones`
+
+**Response**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "hp_solang_rohtang",
+      "name": "Himachal Pradesh (Solang / Rohtang)",
+      "state": "Himachal Pradesh",
+      "center_lat": 32.3167,
+      "center_lng": 77.1333,
+      "default_radius_km": 14
+    }
+  ]
+}
+```
+
+---
+
+### Preview affected tourists (on radius slider change)
+
+- **Method:** `POST`
+- **Route:** `/broadcast/preview`
+
+Call this whenever the user moves the **Geofence Radius (km)** slider.
+
+**Request**
+
+```json
+{
+  "zone_id": "hp_solang_rohtang",
+  "radius_km": 14
+}
+```
+
+**Response**
+
+```json
+{
+  "success": true,
+  "data": {
+    "zone_id": "hp_solang_rohtang",
+    "zone_name": "Himachal Pradesh (Solang / Rohtang)",
+    "state": "Himachal Pradesh",
+    "radius_km": 14,
+    "center_lat": 32.3167,
+    "center_lng": 77.1333,
+    "tourist_count": 2,
+    "affected_tourists": [
+      {
+        "tourist_id": "tourist_hp_1",
+        "latitude": 32.32,
+        "longitude": 77.14,
+        "distance_km": 0.85,
+        "recorded_at": "2026-08-13T05:00:00Z"
+      }
+    ]
+  },
+  "message": "2 tourist(s) within 14 km"
+}
+```
+
+---
+
+### Send emergency broadcast
+
+- **Method:** `POST`
+- **Route:** `/broadcast/send`
+
+**Request** (matches authority form fields)
+
+```json
+{
+  "zone_id": "hp_solang_rohtang",
+  "radius_km": 14,
+  "severity": "CRITICAL",
+  "title": "⚠️ Flash Flood & Sudden Cloudburst Warning",
+  "message": "Heavy rainfall alert active in Solang Valley. Avoid unmapped riverbanks and move to higher ground immediately."
+}
+```
+
+`severity` values: `CRITICAL`, `WARNING`, `ADVISORY`
+
+**Response**
+
+```json
+{
+  "success": true,
+  "data": {
+    "broadcast_id": 1,
+    "zone_id": "hp_solang_rohtang",
+    "zone_name": "Himachal Pradesh (Solang / Rohtang)",
+    "state": "Himachal Pradesh",
+    "radius_km": 14,
+    "severity": "CRITICAL",
+    "title": "⚠️ Flash Flood & Sudden Cloudburst Warning",
+    "message": "Heavy rainfall alert active...",
+    "tourists_notified": 2,
+    "deliveries": [],
+    "sent_at": "2026-08-13T05:00:00Z"
+  }
+}
+```
+
+---
+
+### User-configurable radius on live location
+
+Tourist-side nearby safety search also respects user radius:
+
+- **Body field:** `safety_radius_km` on `POST /locations/{tourist_id}`
+- **Query param:** `radius_km` on `GET /locations/{tourist_id}/live`
+- **Query param:** `radius_km` on `GET /safety-resources/nearby`
+
+```json
+{
+  "latitude": 26.5775,
+  "longitude": 93.1711,
+  "safety_radius_km": 14
+}
+```

@@ -29,10 +29,12 @@ router = APIRouter(prefix="/locations", tags=["locations"])
 def update_location(
     tourist_id: str,
     payload: LocationUpdateRequest,
+    radius_km: float | None = Query(None, gt=0, le=100, description="Override safety search radius (km)"),
     db: Session = Depends(get_db),
 ) -> APIResponse[LocationUpdateResult]:
     service = LocationService(db)
-    result = service.update_location(tourist_id, payload)
+    effective_radius = radius_km if radius_km is not None else payload.safety_radius_km
+    result = service.update_location(tourist_id, payload, safety_radius_km=effective_radius)
     return APIResponse(data=result, message="Location updated")
 
 
@@ -114,11 +116,13 @@ def simulate_movement(
 def mock_location(
     tourist_id: str,
     payload: MockLocationRequest,
+    radius_km: float | None = Query(None, gt=0, le=100),
     db: Session = Depends(get_db),
 ) -> APIResponse[LocationUpdateResult]:
     service = LocationService(db)
     result = service.update_location(
         tourist_id,
         LocationUpdateRequest(latitude=payload.latitude, longitude=payload.longitude),
+        safety_radius_km=radius_km,
     )
     return APIResponse(data=result, message=f"Mock location applied{f': {payload.label}' if payload.label else ''}")
