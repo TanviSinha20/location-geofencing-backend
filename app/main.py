@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import broadcast, geofence, location, safety_resource
+from app.api.routes import broadcast, geofence, location, safety_resource, ai, identity
 from app.config.settings import settings
 from app.database.connection import SessionLocal, init_db
 from app.schemas.common import ErrorResponse
@@ -54,6 +54,8 @@ app.include_router(location.router, prefix="/api/v1")
 app.include_router(geofence.router, prefix="/api/v1")
 app.include_router(safety_resource.router, prefix="/api/v1")
 app.include_router(broadcast.router, prefix="/api/v1")
+app.include_router(ai.router, prefix="/api/v1")
+app.include_router(identity.router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["health"])

@@ -55,6 +55,7 @@ class GeofenceService:
             description=payload.description,
             warning_message=payload.warning_message,
             is_active=payload.is_active,
+            is_crowd_zone=payload.is_crowd_zone,
         )
         self._apply_geometry(zone, payload.geometry_type, payload.circle, payload.polygon)
         self.db.add(zone)
@@ -76,6 +77,8 @@ class GeofenceService:
             zone.warning_message = payload.warning_message
         if payload.is_active is not None:
             zone.is_active = payload.is_active
+        if payload.is_crowd_zone is not None:
+            zone.is_crowd_zone = payload.is_crowd_zone
         if payload.circle is not None:
             zone.geometry_type = GeometryType.CIRCLE.value
             zone.center_lat = payload.circle.center_lat
@@ -218,6 +221,11 @@ class GeofenceService:
         )
         self.db.add(row)
         self.db.flush()
+
+        if row.severity == "CRITICAL":
+            from app.identity.audit_service import log_incident
+            log_incident(row, self.db)
+
         return self._event_to_response(row)
 
     def _get_zone_or_404(self, zone_id: str) -> GeoFence:
@@ -253,6 +261,7 @@ class GeofenceService:
             description=zone.description,
             warning_message=zone.warning_message,
             is_active=zone.is_active,
+            is_crowd_zone=zone.is_crowd_zone,
             center_lat=zone.center_lat,
             center_lng=zone.center_lng,
             radius_m=zone.radius_m,

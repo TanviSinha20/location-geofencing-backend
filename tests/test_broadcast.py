@@ -71,15 +71,15 @@ def test_send_broadcast(client):
 
 
 def test_location_update_user_radius(client):
-    client.post("/api/v1/locations/tourist_radius_1", json={"latitude": 26.5775, "longitude": 93.1711})
+    client.post("/api/v1/locations/tourist_radius_1", json={"latitude": 32.317, "longitude": 77.157})
 
     narrow = client.post(
         "/api/v1/locations/tourist_radius_1",
-        json={"latitude": 26.5775, "longitude": 93.1711, "safety_radius_km": 5},
+        json={"latitude": 32.317, "longitude": 77.157, "safety_radius_km": 5},
     )
     wide = client.post(
         "/api/v1/locations/tourist_radius_1",
-        json={"latitude": 26.5775, "longitude": 93.1711, "safety_radius_km": 50},
+        json={"latitude": 32.317, "longitude": 77.157, "safety_radius_km": 50},
     )
     narrow_count = sum(
         len(narrow.json()["data"]["nearby_safety"][k])

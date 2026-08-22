@@ -37,6 +37,7 @@ class GeoFenceCreateRequest(BaseModel):
     description: str | None = None
     warning_message: str = Field(..., min_length=1)
     is_active: bool = True
+    is_crowd_zone: bool = False
     circle: CircleGeometry | None = None
     polygon: PolygonGeometry | None = None
 
@@ -60,6 +61,7 @@ class GeoFenceUpdateRequest(BaseModel):
     description: str | None = None
     warning_message: str | None = None
     is_active: bool | None = None
+    is_crowd_zone: bool | None = None
     circle: CircleGeometry | None = None
     polygon: PolygonGeometry | None = None
 
@@ -75,6 +77,7 @@ class GeoFenceResponse(BaseModel):
     description: str | None
     warning_message: str
     is_active: bool
+    is_crowd_zone: bool = False
     center_lat: float | None = None
     center_lng: float | None = None
     radius_m: float | None = None
@@ -98,6 +101,7 @@ class GeoFenceResponse(BaseModel):
                 "description": data.description,
                 "warning_message": data.warning_message,
                 "is_active": data.is_active,
+                "is_crowd_zone": getattr(data, "is_crowd_zone", False),
                 "center_lat": data.center_lat,
                 "center_lng": data.center_lng,
                 "radius_m": data.radius_m,

@@ -21,3 +21,4 @@ class GeoFence(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     warning_message: Mapped[str] = mapped_column(Text, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    is_crowd_zone: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

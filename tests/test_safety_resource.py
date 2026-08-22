@@ -16,10 +16,10 @@ def test_list_seeded_safety_resources(client):
 
 
 def test_find_nearby_safety_resources(client):
-    # Kohora area coordinates
+    # Solang Valley HP coordinates
     response = client.get(
         "/api/v1/safety-resources/nearby",
-        params={"latitude": 26.5775, "longitude": 93.1711, "radius_km": 25},
+        params={"latitude": 32.317, "longitude": 77.157, "radius_km": 25},
     )
     assert response.status_code == 200
     data = response.json()["data"]
@@ -32,7 +32,7 @@ def test_find_nearby_safety_resources(client):
 def test_location_update_includes_nearby_safety(client):
     response = client.post(
         "/api/v1/locations/tourist_live_1",
-        json={"latitude": 26.5775, "longitude": 93.1711, "accuracy": 5.0},
+        json={"latitude": 32.317, "longitude": 77.157, "accuracy": 5.0},
     )
     assert response.status_code == 200
     data = response.json()["data"]
@@ -43,7 +43,7 @@ def test_location_update_includes_nearby_safety(client):
 def test_live_location_endpoint(client):
     client.post(
         "/api/v1/locations/tourist_live_2",
-        json={"latitude": 26.5800, "longitude": 93.1700},
+        json={"latitude": 32.315, "longitude": 77.155},
     )
     response = client.get("/api/v1/locations/tourist_live_2/live", params={"radius_km": 25})
     assert response.status_code == 200
@@ -58,8 +58,8 @@ def test_create_safety_resource(client):
         id="patrol_test_1",
         name="Test Patrol Unit",
         resource_type=SafetyResourceType.PATROL,
-        latitude=26.5600,
-        longitude=93.1500,
+        latitude=32.3000,
+        longitude=77.1500,
         phone="+91-9999999999",
     )
     response = client.post("/api/v1/safety-resources", json=payload.model_dump(mode="json"))
